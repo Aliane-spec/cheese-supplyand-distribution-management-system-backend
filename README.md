@@ -1,91 +1,196 @@
 # Cheese Supply and Distribution Management System Backend
 
-## Student information
+| | |
+|---|---|
+| **Student** | Umutoniwase Aliane |
+| **Student ID** | 27771 |
+| **Project** | Cheese Supply and Distribution Management System |
 
-- **Student name:** Umutoniwase Aliane
-- **Student ID:** 27771
-- **Project name:** Cheese Supply and Distribution Management System
+A REST API built with Spring Boot, Spring Data JPA, and PostgreSQL for managing cheese types, depots, distributors, retailers, supply orders, and delivery batches.
 
-## Project overview
-
-A Spring Boot REST API for managing cheese types, depots, distributors, retailers, supply orders, and delivery batches. It uses Spring Data JPA and Hibernate to persist data in PostgreSQL.
-
-## Requirements
+## Technologies
 
 - Java 17
-- Maven 3.6.3 or later
+- Spring Boot 4.1.2
+- Spring Web
+- Spring Data JPA and Hibernate
 - PostgreSQL
-- Postman Web and the Postman Desktop Agent for local API testing
+- Maven
+- Postman
 
-## Database setup
+## Domain model
 
-1. Start PostgreSQL.
-2. Create the database if it does not already exist:
+| Entity | Table | Main relationships |
+|---|---|---|
+| `CheeseType` | `cheese_type` | Many-to-many with `Distributor` |
+| `Depot` | `depot` | One depot can be assigned to distributors, subject to the application's rule that a depot is not taken by another distributor |
+| `Distributor` | `distributor` | Many-to-one with `Depot`; many-to-many with `CheeseType` |
+| `Retailer` | `retailer` | One retailer can have many `SupplyOrder` records |
+| `SupplyOrder` | `supply_order` | Many-to-one with `Retailer` and `Distributor` |
+| `DeliveryBatch` | `delivery_batch` | Many-to-one with `SupplyOrder` |
 
-   ```sql
-   CREATE DATABASE "Cheese supply";
-   ```
+`OrderStatus` has four values: `PLACED`, `DISPATCHED`, `DELIVERED`, and `REJECTED`. Allowed transitions are `PLACED` to `DISPATCHED` or `REJECTED`, and `DISPATCHED` to `DELIVERED` or `REJECTED`. `DELIVERED` and `REJECTED` are final statuses.
 
-3. Create `src/main/resources/application.properties` in the project. This local file is excluded from Git because it contains database credentials. Add the following settings and replace `YOUR_POSTGRES_PASSWORD` with the password for your local PostgreSQL `postgres` user:
+## How to run the API
 
-   ```properties
-   spring.application.name=cheese-supplyand-distribution-management-system
-   spring.datasource.url=jdbc:postgresql://localhost:5432/Cheese%20supply
-   spring.datasource.username=postgres
-   spring.datasource.password=YOUR_POSTGRES_PASSWORD
-   spring.jpa.hibernate.ddl-auto=update
-   spring.jpa.show-sql=true
-   server.port=8085
-   ```
+### Prerequisites
 
-Hibernate creates or updates the entity tables after the application connects. It does not create the PostgreSQL database or populate the assignment records. Add the required records through the API.
+- Java 17 or later
+- Maven 3.6.3 or later
+- PostgreSQL running on `localhost:5432`
 
-## Run the API
+### 1. Clone the repository
 
-Open PowerShell in the project root and run:
+Open PowerShell and run:
+
+```powershell
+git clone https://github.com/Aliane-spec/cheese-supplyand-distribution-management-system-backend.git
+cd cheese-supplyand-distribution-management-system-backend
+```
+
+### 2. Create the database
+
+In PostgreSQL or pgAdmin, create a database named `Cheese supply` if it does not already exist:
+
+```sql
+CREATE DATABASE "Cheese supply";
+```
+
+Hibernate creates or updates the entity tables after a successful connection. It does not create the database itself.
+
+### 3. Configure the local database password
+
+Create `src/main/resources/application.properties` with the following settings:
+
+```properties
+spring.application.name=cheese-supplyand-distribution-management-system
+spring.datasource.url=jdbc:postgresql://localhost:5432/Cheese%20supply
+spring.datasource.username=postgres
+spring.datasource.password=${DB_PASSWORD}
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+server.port=8085
+```
+
+The local `application.properties` file is excluded from Git. In the same PowerShell window you will use to run the app, set your own PostgreSQL password:
+
+```powershell
+$env:DB_PASSWORD = "your PostgreSQL password"
+```
+
+Replace the example text with the password configured for your local PostgreSQL `postgres` user. Do not commit or share the password.
+
+### 4. Start the application
+
+From the project folder, run:
 
 ```powershell
 mvn spring-boot:run
 ```
 
-Wait until the console reports that the application started. The API base URL is `http://localhost:8085`. Keep the terminal open while testing.
+Keep the terminal open while using the API. When Spring Boot reports that the application has started, the API is available at `http://localhost:8085`.
 
-To compile the project and run its Maven tests:
+To compile the project and run its Maven tests, use:
 
 ```powershell
 mvn clean test
 ```
 
-## Test with Postman
+## Seed data
 
-Import `cheese-supplyand-distribution-management-system-midterm.postman_collection.json` from the project root. In Postman Web, select the **Desktop Agent** so requests can reach the API running on `localhost`.
+Seed records are added through the API save endpoints; they are not included in the source code. Add records in this order because later records refer to earlier records:
 
-Run requests individually, not with **Run collection**, because some requests create, update, or delete database records. Requests that require UUIDs need IDs from this database; retrieve them from the corresponding `/api/{resource}/all` endpoint and update the collection variables. For delivery-batch creation (E1), use a supply order with status `DELIVERED`. E2 uses that order retailer's license number. Be ready for the live demonstration to show a successful response, an error response, and briefly explain the code for the selected requirements.
+1. **Cheese types:** Gouda, Mozzarella, Cheddar, and Feta (leave Feta unassigned if demonstrating the unused-cheese query).
+2. **Depots:** numbers 1, 2, 3, and 4 (leave depot 4 unassigned if demonstrating the free-depots query).
+3. **Distributors:** create three distributors and assign depots and cheese types.
+4. **Retailers:** create five retailers, including two with owner name `Umutoni`.
+5. **Supply orders:** create orders across the required dates and statuses, including at least two with status `DELIVERED`.
 
-## Assignment features and API
+Use the relevant `GET /api/{resource}/all` endpoint to retrieve generated IDs.
+
+## API endpoints
 
 All endpoints use `http://localhost:8085`.
 
-- **Part A — Domain model and CRUD:** cheese types, depots, distributors, retailers, and supply orders.
-- **Part B — Derived queries:** retailer owner search, supply-order status and date-range searches.
-- **Part C — JPQL queries:** distributors by cheese type, free depots, unused cheese types, and retailers of a distributor.
-- **Part D — Business rules:** safe order creation and status transitions, distributor cheese-type assignment, and depot changes.
-- **Part E — Delivery batches:** save batches for delivered orders, retailer batch history, deletion, and protection from deleting orders with batches.
-- **Part F — Reports and bulk updates:** supply-order counts by status and cancel-day updates.
-- **Bonus:** dashboard summary and paginated supply orders.
+### Part A — CRUD
 
-Main route groups:
+The main CRUD resources are `cheese-types`, `depots`, `distributors`, `retailers`, and `supply-orders`.
 
-| Resource | Route |
-|---|---|
-| Cheese types | `/api/cheese-types` |
-| Depots | `/api/depots` |
-| Distributors | `/api/distributors` |
-| Retailers | `/api/retailers` |
-| Supply orders | `/api/supply-orders` |
-| Delivery batches | `/api/delivery-batches` |
-| Dashboard | `GET /api/dashboard/summary` |
+| Method | Endpoint pattern | Purpose |
+|---|---|---|
+| `POST` | `/api/{resource}/save` | Create a record |
+| `GET` | `/api/{resource}/all` | List records |
+| `GET` | `/api/{resource}/{id}` | Get a record by ID |
+| `PUT` | `/api/{resource}/update/{id}` | Update a record |
+| `DELETE` | `/api/{resource}/delete/{id}` | Delete a record |
 
-## GitHub submission
+### Part B — Derived queries
 
-The public repository for this assignment is named `cheese-supplyand-distribution-management-system-backend`. The repository includes this README, the Postman collection JSON, Maven configuration, and application source code. Do not commit the local `application.properties` file or publish its database password.
+| ID | Method | Endpoint |
+|---|---|---|
+| B1 | `GET` | `/api/retailers/by-owner-name?ownerName=umutoni` |
+| B2 | `GET` | `/api/supply-orders/by-status?status=PLACED` |
+| B3 | `GET` | `/api/supply-orders/between?start=2026-10-01&end=2026-10-31` |
+
+### Part C — JPQL queries
+
+| ID | Method | Endpoint |
+|---|---|---|
+| C1 | `GET` | `/api/distributors/by-cheese-type?name=gouda` |
+| C2 | `GET` | `/api/depots/free` |
+| C3 | `GET` | `/api/cheese-types/unused` |
+| C4 | `GET` | `/api/retailers/of-distributor/{distributorId}` |
+
+### Part D — Business rules
+
+| ID | Method | Endpoint | Expected behavior |
+|---|---|---|---|
+| D1 | `POST` | `/api/supply-orders/save` | Reject past dates with `400`; reject duplicate non-rejected distributor orders on the same date with `409`; new orders start as `PLACED` |
+| D2 | `PATCH` | `/api/supply-orders/{id}/status?status=DISPATCHED` | Allow only valid status transitions |
+| D3 | `PUT` | `/api/distributors/{distributorId}/cheese-types/{cheeseTypeId}` | Add a cheese type; reject duplicates |
+| D4 | `PATCH` | `/api/distributors/{distributorId}/depot?depotNumber=4` | Move a distributor to a free depot |
+
+### Part E — Delivery batches
+
+| ID | Method | Endpoint | Expected behavior |
+|---|---|---|---|
+| E1 | `POST` | `/api/delivery-batches/save?supplyOrderId={id}` | Save a batch only for a `DELIVERED` supply order |
+| E2 | `GET` | `/api/delivery-batches/retailer/{licenseNumber}` | Return retailer batches, newest first |
+| E3 | `DELETE` | `/api/delivery-batches/delete/{id}` | Delete a delivery batch |
+
+A supply order with delivery batches cannot be deleted until its batches are removed; the supply-order delete endpoint returns `409` in that case.
+
+### Part F — Reports and bulk updates
+
+| ID | Method | Endpoint |
+|---|---|---|
+| F1 | `GET` | `/api/supply-orders/stats/by-status` |
+| F2 | `PATCH` | `/api/supply-orders/cancel-day?distributorId={id}&date=2026-10-20` |
+
+### Bonus
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/dashboard/summary` | Counts retailers, distributors, free depots, today's orders, placed orders, and delivery batches |
+| `GET` | `/api/supply-orders/page?page=0&size=5&sort=orderDate,desc` | Returns a page of supply orders with page totals |
+
+## Test with Postman
+
+1. Import `cheese-supplyand-distribution-management-system-midterm.postman_collection.json` from the repository root.
+2. In Postman Web, select the Postman Desktop Agent so requests can reach `localhost`.
+3. The collection's base URL is `http://localhost:8085`.
+4. Replace collection UUID variables with IDs returned by the corresponding `/api/{resource}/all` endpoints when testing against a different database.
+5. Use a `DELIVERED` order for E1 and its retailer's license number for E2.
+6. Send requests individually. Some requests create, update, or delete database records.
+7. For the live demonstration, show successful and failing responses and explain the related repository, service, and controller logic.
+
+## Project structure
+
+```text
+src/main/java/com/example/cheesesupply/
+├── CheeseSupplyApplication.java
+├── controller/   REST endpoints
+├── service/      business rules
+├── repository/   Spring Data JPA queries
+└── domain/       entities and order status
+```
