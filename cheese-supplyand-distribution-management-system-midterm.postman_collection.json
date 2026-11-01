@@ -1,0 +1,799 @@
+{
+  "info": {
+    "_postman_id": "b66959e8-14b5-474a-af07-32990ede086a",
+    "name": "Cheese Supply and Distribution Management System Midterm",
+    "description": "Postman requests for assignment requirements A1-F2 and the two bonus features. Set the UUID variables to IDs returned by the API before running requests that need them. Requests that create, update, or delete data should be run individually.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58445255"
+  },
+  "item": [
+    {
+      "name": "A1 - Verify entity data",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Entity data endpoint returns 200', function () { pm.response.to.have.status(200); });\npm.test('Cheese types are returned as a JSON array', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/cheese-types/all",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "cheese-types",
+            "all"
+          ]
+        },
+        "description": "Inspect the entity data created from the JPA model. Verify the five Part A entity resources and their relationships using the related /all endpoints."
+      },
+      "response": []
+    },
+    {
+      "name": "A2 - Create retailer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Retailer save returns 201 Created', function () { pm.response.to.have.status(201); });\npm.test('Save response contains success message', function () { pm.expect(pm.response.text()).to.include('Retailer saved successfully'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"shopName\": \"Postman Sample Shop\",\n  \"ownerName\": \"Postman Tester\",\n  \"licenseNumber\": \"RT-PM-{{$timestamp}}\",\n  \"phone\": \"0788001999\",\n  \"town\": \"Kigali\"\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "localhost:8085/api/retailers/save",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "retailers",
+            "save"
+          ]
+        },
+        "description": "A2 CRUD example. The other CRUD routes use /all, /{id}, /update/{id}, and /delete/{id} for each entity path."
+      },
+      "response": []
+    },
+    {
+      "name": "B1 - Retailers by owner name",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Owner-name query returns 200', function () { pm.response.to.have.status(200); });\npm.test('Response is a list', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/retailers/by-owner-name?ownerName=umutoni",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "retailers",
+            "by-owner-name"
+          ],
+          "query": [
+            {
+              "key": "ownerName",
+              "value": "umutoni"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "B2 - Supply orders by status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status query returns 200', function () { pm.response.to.have.status(200); });\npm.test('All returned orders have the requested status', function () { pm.response.json().forEach(function (order) { pm.expect(order.status).to.eql('PLACED'); }); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/supply-orders/by-status?status=PLACED",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "supply-orders",
+            "by-status"
+          ],
+          "query": [
+            {
+              "key": "status",
+              "value": "PLACED"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "B3 - Supply orders between dates",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Date-range query returns 200', function () { pm.response.to.have.status(200); });\npm.test('Response is a list', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/supply-orders/between?start=2026-10-01&end=2026-10-31",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "supply-orders",
+            "between"
+          ],
+          "query": [
+            {
+              "key": "start",
+              "value": "2026-10-01"
+            },
+            {
+              "key": "end",
+              "value": "2026-10-31"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "C1 - Distributors by cheese type",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Cheese-type query returns 200', function () { pm.response.to.have.status(200); });\npm.test('Response is a list', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/distributors/by-cheese-type?name=gouda",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "distributors",
+            "by-cheese-type"
+          ],
+          "query": [
+            {
+              "key": "name",
+              "value": "gouda"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "C2 - Free depots",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Free-depots query returns 200', function () { pm.response.to.have.status(200); });\npm.test('Free depot results are returned as a list', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/depots/free",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "depots",
+            "free"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "C3 - Unused cheese types",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Unused-cheese query returns 200', function () { pm.response.to.have.status(200); });\npm.test('Unused cheese types are returned as a list', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/cheese-types/unused",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "cheese-types",
+            "unused"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "C4 - Retailers of a distributor",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Retailers-of-distributor request returns 200 for a valid ID', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/retailers/of-distributor/59b5ed2b-036c-45ca-8b1f-8e0d68cd899b",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "retailers",
+            "of-distributor",
+            "59b5ed2b-036c-45ca-8b1f-8e0d68cd899b"
+          ]
+        },
+        "description": "Set distributorId to an existing distributor UUID to verify the success case. Use an unknown UUID to demonstrate the required 404."
+      },
+      "response": []
+    },
+    {
+      "name": "D1 - Save supply order safely",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Valid new order returns 201 Created', function () { pm.response.to.have.status(201); });\npm.test('Response confirms order was saved', function () { pm.expect(pm.response.text()).to.include('Supply order saved successfully'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orderDate\": \"2026-12-01\",\n  \"status\": \"DELIVERED\",\n  \"quantityKg\": 12,\n  \"retailer\": { \"id\": \"01dc49f5-3946-48bd-bfa9-e1f86800dcb5\"},\n  \"distributor\": { \"id\": \"59b5ed2b-036c-45ca-8b1f-8e0d68cd899b\"}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "localhost:8085/api/supply-orders/save",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "supply-orders",
+            "save"
+          ]
+        },
+        "description": "Uses a future date and an existing retailer/distributor. The service forces status to PLACED. Re-send the same request to demonstrate 409; use a past date to demonstrate 400."
+      },
+      "response": []
+    },
+    {
+      "name": "D2 - Update supply-order status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Allowed status transition returns 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/supply-orders/45068638-ba86-45ac-a6a8-65af5e10c351/status?status=DISPATCHED",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "supply-orders",
+            "45068638-ba86-45ac-a6a8-65af5e10c351",
+            "status"
+          ],
+          "query": [
+            {
+              "key": "status",
+              "value": "DISPATCHED"
+            }
+          ]
+        },
+        "description": "Use a PLACED supply order for the success case. Use a DELIVERED or REJECTED order to demonstrate a 400 invalid transition."
+      },
+      "response": []
+    },
+    {
+      "name": "D3 - Add cheese type to distributor",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('New distributor-cheese link returns 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/distributors/ca7bf59e-6c80-4d04-8507-7d17d8d23346/cheese-types/698557dd-9400-452c-b014-0471b3a4ea7b",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "distributors",
+            "ca7bf59e-6c80-4d04-8507-7d17d8d23346",
+            "cheese-types",
+            "698557dd-9400-452c-b014-0471b3a4ea7b"
+          ]
+        },
+        "description": "Use a distributor/cheese combination that is not already linked for the success case. Re-send it to demonstrate the duplicate-link 409."
+      },
+      "response": []
+    },
+    {
+      "name": "D4 - Move distributor to depot",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Move to free depot returns 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/distributors/71947883-6d1e-4dee-99d3-982a4624189f/depot?depotNumber=4",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "distributors",
+            "71947883-6d1e-4dee-99d3-982a4624189f",
+            "depot"
+          ],
+          "query": [
+            {
+              "key": "depotNumber",
+              "value": "4"
+            }
+          ]
+        },
+        "description": "Depot 4 is free in the seed data. Moving to a depot currently held by a different distributor demonstrates the 409 response."
+      },
+      "response": []
+    },
+    {
+      "name": "E1 - Save delivery batch",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Batch for delivered order returns 201 Created', function () { pm.response.to.have.status(201); });\npm.test('Response confirms batch save', function () { pm.expect(pm.response.text()).to.include('Delivery batch saved successfully'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cheeseName\": \"Gouda\",\n  \"note\": \"Batch GD-118, expires in 60 days\",\n  \"quantityKg\": 25\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "localhost:8085/api/delivery-batches/save?supplyOrderId=7e7c60c7-956b-441c-b5c9-b2f79eb9572a",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "delivery-batches",
+            "save"
+          ],
+          "query": [
+            {
+              "key": "supplyOrderId",
+              "value": "7e7c60c7-956b-441c-b5c9-b2f79eb9572a"
+            }
+          ]
+        },
+        "description": "Set deliveredSupplyOrderId to a DELIVERED order. A non-delivered order returns 400; an unknown order returns 404."
+      },
+      "response": []
+    },
+    {
+      "name": "E2 - Retailer delivery-batch history",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Retailer batch history returns 200', function () { pm.response.to.have.status(200); });\npm.test('Batch history is returned as a list', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/delivery-batches/retailer/RT-2044",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "delivery-batches",
+            "retailer",
+            "RT-2044"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "E3 - Delete delivery batch",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Existing batch delete returns 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/delivery-batches/delete/{{deliveryBatchId}}",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "delivery-batches",
+            "delete",
+            "{{deliveryBatchId}}"
+          ]
+        },
+        "description": "Set deliveryBatchId to a batch UUID. Deleting its associated supply order before deleting its batch must return 409."
+      },
+      "response": []
+    },
+    {
+      "name": "F1 - Supply-order counts by status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status statistics return 200', function () { pm.response.to.have.status(200); });\npm.test('Statistics are returned as rows', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/supply-orders/stats/by-status",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "supply-orders",
+            "stats",
+            "by-status"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "F2 - Cancel distributor orders for a day",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Bulk cancel returns 200', function () { pm.response.to.have.status(200); });\npm.test('Response reports cancelled count', function () { pm.expect(pm.response.text()).to.match(/^\\d+ supply orders cancelled$/); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/supply-orders/cancel-day?distributorId=59b5ed2b-036c-45ca-8b1f-8e0d68cd899b&date=2026-12-01",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "supply-orders",
+            "cancel-day"
+          ],
+          "query": [
+            {
+              "key": "distributorId",
+              "value": "59b5ed2b-036c-45ca-8b1f-8e0d68cd899b"
+            },
+            {
+              "key": "date",
+              "value": "2026-12-01"
+            }
+          ]
+        },
+        "description": "Bulk-updates non-delivered orders on testOrderDate. For a safe test, set distributorId to the distributor used by D1 and run D1 first so this updates the newly created test order instead of changing the assignment seed data."
+      },
+      "response": []
+    },
+    {
+      "name": "+5 - Dashboard summary",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Dashboard returns 200', function () { pm.response.to.have.status(200); });\npm.test('Dashboard includes all summary values', function () { var body = pm.response.json(); ['retailers', 'distributors', 'freeDepots', 'ordersToday', 'placed', 'batches'].forEach(function (key) { pm.expect(body).to.have.property(key); }); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/dashboard/summary",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "dashboard",
+            "summary"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "+5 - Supply orders page",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Paged supply orders return 200', function () { pm.response.to.have.status(200); });\npm.test('Page includes content and totals', function () { var body = pm.response.json(); pm.expect(body).to.have.property('content'); pm.expect(body).to.have.property('totalPages'); pm.expect(body).to.have.property('totalElements'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "localhost:8085/api/supply-orders/page?page=0&size=5&sort=orderDate,desc",
+          "host": [
+            "localhost"
+          ],
+          "port": "8085",
+          "path": [
+            "api",
+            "supply-orders",
+            "page"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "5"
+            },
+            {
+              "key": "sort",
+              "value": "orderDate,desc"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8085"
+    },
+    {
+      "key": "retailerId",
+      "value": "74fdcd46-e6b7-4169-b005-97615aef2100"
+    },
+    {
+      "key": "distributorId",
+      "value": "ca7bf59e-6c80-4d04-8507-7d17d8d23346"
+    },
+    {
+      "key": "cheeseTypeId",
+      "value": "8d653b04-074f-4bb7-b8ca-5dca6cc8d9bf"
+    },
+    {
+      "key": "supplyOrderId",
+      "value": "8ff12070-2f40-4727-baec-7540ef1bfb85"
+    },
+    {
+      "key": "deliveredSupplyOrderId",
+      "value": "7e7c60c7-956b-441c-b5c9-b2f79eb9572a"
+    },
+    {
+      "key": "deliveryBatchId",
+      "value": "dd2a6707-b55a-41d8-91a2-4af37adbb2da"
+    },
+    {
+      "key": "licenseNumber",
+      "value": "RT-2044"
+    },
+    {
+      "key": "testOrderDate",
+      "value": "2026-12-01"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+target/
+
+# Local database credentials and environment variables
+src/main/resources/application.properties
+.env
+.env.*
+!.env.example
+
+# IDE and operating-system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.bak
